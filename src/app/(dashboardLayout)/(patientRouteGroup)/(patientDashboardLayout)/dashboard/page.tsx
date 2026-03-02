@@ -1,7 +1,11 @@
 
 
-export const PatientDashboardPage = () => {
+
+
+const DashboardPage = () => {
   return (
-    <div>PatientDashboardPage</div>
+    <div>Dash page</div>
   )
 }
+
+export default DashboardPage

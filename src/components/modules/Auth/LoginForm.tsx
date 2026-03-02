@@ -97,7 +97,9 @@ const LoginForm = () => {
                 field={field}
                 label="Password"
                 type={showPassword ? "text" : "password"}
+                
                 placeholder="Enter your password"
+                className="cursor-pointer"
                 append={
                   <Button
                     type="button"
