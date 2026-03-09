@@ -5,7 +5,7 @@ export default function CommonProtectedLayout({
 }>) {
   return (
     <>
-      Common procted dashboardlayout
+      
       {children}
     </>
   );
