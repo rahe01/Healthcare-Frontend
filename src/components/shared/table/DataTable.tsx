@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -5,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import {
   Table,
   TableBody,
@@ -13,12 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+
 import { MoreHorizontal } from "lucide-react";
 
 interface DataTableActions<TData> {
@@ -28,7 +33,7 @@ interface DataTableActions<TData> {
 }
 
 interface DataTableProps<TData> {
-  data: TData[];
+  data?: TData[];
   columns: ColumnDef<TData>[];
   actions?: DataTableActions<TData>;
   emptyMessage?: string;
@@ -36,19 +41,17 @@ interface DataTableProps<TData> {
 }
 
 const DataTable = <TData,>({
-  data,
+  data = [],
   columns,
   actions,
-  emptyMessage,
-  isLoading,
+  emptyMessage = "No data available.",
+  isLoading = false,
 }: DataTableProps<TData>) => {
   const tableColumns: ColumnDef<TData>[] = actions
     ? [
         ...columns,
-
-        // Action column
         {
-          id: "actions", // Unique id for the column
+          id: "actions",
           header: "Actions",
           cell: ({ row }) => {
             const rowData = row.original;
@@ -56,7 +59,7 @@ const DataTable = <TData,>({
             return (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant={"ghost"} className="h-8 w-8 p-0">
+                  <Button variant="ghost" className="h-8 w-8 p-0">
                     <span className="sr-only">Open Menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -90,15 +93,17 @@ const DataTable = <TData,>({
       ]
     : columns;
 
-  const { getHeaderGroups, getRowModel } = useReactTable({
-    data,
+  const table = useReactTable({
+    data: Array.isArray(data) ? data : [],
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
   });
+
   return (
     <div className="relative">
+      {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center">
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <span className="text-sm text-muted-foreground">Loading...</span>
@@ -106,26 +111,31 @@ const DataTable = <TData,>({
         </div>
       )}
 
-      {/* // Table */}
+      {/* Table */}
       <div className="rounded-lg border">
         <Table>
+          {/* Table Header */}
           <TableHeader>
-            {getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
-                {hg.headers.map((header) => (
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
+
+          {/* Table Body */}
           <TableBody>
-            {getRowModel().rows.length ? (
-              getRowModel().rows.map((row) => (
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -141,9 +151,9 @@ const DataTable = <TData,>({
               <TableRow>
                 <TableCell
                   colSpan={tableColumns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-muted-foreground"
                 >
-                  {emptyMessage || "No data available."}
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
